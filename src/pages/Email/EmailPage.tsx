@@ -13,7 +13,9 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { useEffect, useState, } from "react";
 import HtmlViewer from "@/components/ui/html-viewer";
 import { useNavigate } from "react-router-dom";
-
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react"
 const baseUrlApi = 'http://localhost:3001/api/get-emails'
 const payload = {
     method: 'POST',
@@ -47,7 +49,9 @@ const dataEmails = [
 export default function EmailPage() {
 
     const [emails, setEmails] = useState<{ date: string; html: string; subject: string }[]>([])
+    const [email, setEmail] = useState<string>('')
     const [loading, setLoading] = useState<boolean>(true)
+    const [isSubmit, setIsSubmit] = useState<boolean>(false)
     const navigate = useNavigate()
 
     const fetchData = async () => {
@@ -81,13 +85,38 @@ export default function EmailPage() {
         navigate('/email/detail', { state: email })
     }
 
+    const setData = () => {
+        if (isSubmit) {
+            setEmail('');
+            setIsSubmit(false);
+            setEmails([]);
+            return;
+        }
+
+        if (email.trim() === '') {
+            alert('Email is required!');
+            return;
+        }
+
+        setIsSubmit(true);
+        setLoading(true);
+        setEmails(email === 'bosnetfl@gmail.com' ? dataEmails : []);
+
+        const timeout = setTimeout(() => {
+            setLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timeout);
+    };
+
+
     useEffect(() => {
         // fetchData()
-        setEmails(dataEmails);
+        // setEmails(dataEmails);
         setTimeout(() => {
             setLoading(false)
         }
-        , 1000)
+            , 1000)
     }, [])
     return (
         <>
@@ -98,9 +127,37 @@ export default function EmailPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Email Inbox</CardTitle>
-                        <CardDescription>List of all received emails</CardDescription>
+                        <CardDescription>List of all received emails <br /><small>(use: <b>
+                            bosnetfl@gmail.com 
+                        </b> for sample data)</small></CardDescription>
+
+                        <div className="mt-16 space-y-4">
+                            <CardTitle className="mt-8">Email <span className="text-red-500">*</span></CardTitle>
+                            <CardDescription >
+                                <div className="flex items-center justify-start gap-2">
+                                    <Input required type="email" placeholder="Email" className="md:w-64"
+                                        value={email}
+                                        name="email" onChange={
+                                            (e) => setEmail(e.target.value)
+                                        }
+                                        disabled={isSubmit}
+                                    />
+                                    <Button
+                                        className="w-24"
+                                        onClick={() => setData()}
+                                        disabled={loading}
+                                    >
+                                        <span>
+                                            {(loading ?
+                                                <Loader2 className="animate-spin" size={24} />
+                                                : isSubmit ? 'Reset' : 'Submit')}
+                                        </span>
+                                    </Button>
+                                </div>
+                            </CardDescription>
+                        </div>
                         <div className="overflow-x-auto">
-                            <Table className="min-w-full">
+                            <Table className="min-w-full mt-3 rounded-lg">
                                 <TableCaption>A list of your recent emails.</TableCaption>
                                 <TableHeader>
                                     <TableRow>
@@ -114,7 +171,7 @@ export default function EmailPage() {
                                         <TableRow>
                                             <TableCell colSpan={3} className="text-center">Loading...</TableCell>
                                         </TableRow>
-                                    ) : (
+                                    ) : emails.length > 0 ? (
                                         emails.map((invoice, index) => (
                                             <TableRow key={index}>
                                                 <TableCell className="font-medium">{index + 1}</TableCell>
@@ -128,7 +185,13 @@ export default function EmailPage() {
 
                                             </TableRow>
                                         ))
-                                    )}
+                                    ) :
+                                        (
+                                            <TableRow>
+                                                <TableCell colSpan={3} className="text-center">No data available</TableCell>
+                                            </TableRow>
+                                        )
+                                    }
                                 </TableBody>
                             </Table>
                         </div>
