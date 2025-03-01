@@ -9,27 +9,35 @@ const EmailDetailPage = () => {
     const email = location.state; // Ambil data dari state
     const navigate = useNavigate();
     if (!email) {
+        navigate(-1);
         return <p>No email data available.</p>;
     }
 
     const formatDate = (isoString: string): string => {
         const date = new Date(isoString);
 
-        const options: Intl.DateTimeFormatOptions = {
-            weekday: 'long', // Menampilkan nama hari
-            year: 'numeric',
+        const datePart = date.toLocaleDateString('id-ID', {
+            weekday: 'long',
+            day: '2-digit',
             month: 'long',
-            day: '2-digit'
-        };
+            year: 'numeric',
+        });
 
-        return date.toLocaleDateString('id-ID', options); // 'id-ID' untuk format Indonesia
-    }
+        const timePart = date.toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        });
+
+        return `${datePart} ${timePart.replace(/\./g, ':')}`;
+    };
+
 
     return (
         <>
             <div className="space-y-4 mb-4">
                 <Button variant={"ghost"} className="flex items-center mt-4 gap-2 text-lg font-medium"
-                onClick={() => navigate(-1)}
+                    onClick={() => navigate(-1)}
                 >
                     <ArrowLeftIcon className="w-5 h-5" />
                     Kembali
