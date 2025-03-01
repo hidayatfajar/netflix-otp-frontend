@@ -71,15 +71,21 @@ export default function EmailPage() {
     const formatDate = (isoString: string): string => {
         const date = new Date(isoString);
 
-        const options: Intl.DateTimeFormatOptions = {
-            weekday: 'long', // Menampilkan nama hari
-            year: 'numeric',
+        const datePart = date.toLocaleDateString('id-ID', {
+            weekday: 'long',
+            day: '2-digit',
             month: 'long',
-            day: '2-digit'
-        };
+            year: 'numeric',
+        });
 
-        return date.toLocaleDateString('id-ID', options); // 'id-ID' untuk format Indonesia
-    }
+        const timePart = date.toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        });
+
+        return `${datePart} ${timePart.replace(/\./g, ':')}`;
+    };
 
     const toDetailPage = (email: { date: string; html: string; subject: string }) => () => {
         navigate('/email/detail', { state: email })
@@ -128,7 +134,7 @@ export default function EmailPage() {
                     <CardHeader>
                         <CardTitle>Email Inbox</CardTitle>
                         <CardDescription>List of all received emails <br /><small>(use: <b>
-                            bosnetfl@gmail.com 
+                            bosnetfl@gmail.com
                         </b> for sample data)</small></CardDescription>
 
                         <div className="mt-16 space-y-4">
